@@ -22,7 +22,7 @@ public class Main {
         
         try {
             while (continuer) {
-                System.out.println("\nEntrez une commande (INFO, CHILD, SIBLINGS, EXIT) :");
+                System.out.println("\nEntrez une commande (INFO, CHILD, SIBLINGS, MARRIED, EXIT, SAVE, LOAD) :");
                 System.out.print("> ");
                 
                 // Lecture de la ligne
@@ -98,9 +98,71 @@ public class Main {
                             System.out.println("Personne introuvable !");
                         }
                         break;
+                    case "SAVE":
+                        // Sauvegarde l'état actuel de la mémoire
+                        genealogie.sauvegarderDansFichier("sauvegarde_genealogie.ser");
+                        break;
+
+                    case "LOAD":
+                        // Charge une mémoire existante
+                        Genealogie chargee = Genealogie.chargerDepuisFichier("sauvegarde_genealogie.ser");
+                        if (chargee != null) {
+                            genealogie = chargee; // On remplace la généalogie courante par celle du fichier
+                            // faut reconnecter le lecteur à la nouvelle généalogie.
+                            lecteur = new LecteurGedcom(genealogie);
+                            System.out.println("Généalogie chargée");
+                        }
+                        break;
+
+                    case "MARRIED":
+                        // vérifie
+                        if (mots.length < 5) { 
+                             // demande juste "MARRIED Prenom1 Nom1 Prenom2 Nom2"
+                             System.out.println("Usage : MARRIED Prenom1 Nom1 Prenom2 Nom2");
+                        } else {
+                             Individu ind1 = genealogie.rechercherParNom(mots[1], mots[2]);
+                             Individu ind2 = genealogie.rechercherParNom(mots[3], mots[4]);
+                             if (ind1 != null && ind2 != null) {
+                                 boolean maries = ind1.estMarieAvec(ind2);
+                                 System.out.println(ind1.getNom() + " est marié avec " + ind2.getNom() + " ? " + maries);
+                             } else {
+                                 System.out.println("L'un des individus n'existe pas.");
+                             }
+                        }
+                        break;
+                    case "FAMC":
+                        if (mots.length < 3) { System.out.println("Usage : FAMC Prénom Nom"); break; }
+                        
+                        // 1. On trouve la personne
+                        Individu enfant = genealogie.rechercherParNom(mots[1], mots[2]);
+                        
+                        if (enfant != null) {
+                            // 2. On récupère sa famille "FAMC" (là où il est enfant)
+                            Famille fam = enfant.getFamc();
+                            
+                            if (fam != null) {
+                                System.out.println("--- FAMILLE D'ORIGINE DE " + enfant.getNom() + " ---");
+                                
+                                // 3. On affiche le Père (en remplaçant l'ID par le Nom)
+                                Individu pere = fam.getPere();
+                                if (pere != null) System.out.println("Père : " + pere.getNom());
+                                else System.out.println("Père : Inconnu");
+                                
+                                // 4. On affiche la Mère
+                                Individu mere = fam.getMere();
+                                if (mere != null) System.out.println("Mère : " + mere.getNom());
+                                else System.out.println("Mère : Inconnu");
+                                
+                            } else {
+                                System.out.println("Cet individu n'a pas de parents connus dans la base.");
+                            }
+                        } else {
+                            System.out.println("Individu introuvable.");
+                        }
+                        break;
     
                     default:
-                        System.out.println("Commande inconnue. Essayez INFO, CHILD ou SIBLINGS.");
+                        System.out.println("Commande inconnue. Essayez INFO, CHILD ou SIBLINGS ou autres.");
                 }
             }
         } catch (IOException e) {

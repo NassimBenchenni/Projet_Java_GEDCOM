@@ -48,7 +48,7 @@ public class LecteurGedcom {
                     // Nouveau contexte : on remet tout à zéro
                     individuCourant = null;
                     familleCourante = null;
-
+                    
                     switch (tag) {
 	                    case "HEAD":
 	                        System.out.println("--- DÉBUT DU FICHIER GEDCOM ---");
